@@ -48,36 +48,32 @@ function activate(context) {
 
             axios(config)
               .then((response) => {
-                vscode.window.showInformationMessage(
-                  "Response: " + JSON.parse(response.data).result
+                const panel = vscode.window.createWebviewPanel(
+                  "docsearch",
+                  "docsearch",
+                  vscode.ViewColumn.One,
+                  {
+                    enableScripts: true,
+                  }
                 );
+                panel.webview.html = `<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Answer to query:</title>
+                </head>
+                <body>
+                    <h2>Question: ${value}</h2>
+                    <h3><span>Answer:</span> ${
+                      JSON.parse(response.data).result
+                    }</h3>
+                </body>
+                </html>`;
               })
               .catch(function (error) {
                 console.log(error);
               });
-
-            // var myHeaders = new Headers();
-            // myHeaders.append("Content-Type", "application/json");
-
-            // var raw = JSON.stringify({
-            //   id: "1",
-            //   lang: "en",
-            //   query: "who invented python",
-            // });
-
-            // var requestOptions = {
-            //   method: "POST",
-            //   headers: myHeaders,
-            //   body: raw,
-            //   redirect: "follow",
-            // };
-
-            // fetch("http://127.0.0.1:8000/search", requestOptions)
-            //   .then((response) => response.text())
-            //   .then((result) =>
-            //   vscode.window.showInformationMessage("Response: " + result)
-            //   )
-            //   .catch((error) => console.log("error", error));
           }
         });
     }
