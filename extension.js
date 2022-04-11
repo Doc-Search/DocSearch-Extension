@@ -39,7 +39,7 @@ function activate(context) {
 
             var config = {
               method: "post",
-              url: "http://127.0.0.1:8000/search",
+              url: "http://127.0.0.1:8000/search/",
               headers: {
                 "Content-Type": "application/json",
               },
