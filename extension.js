@@ -65,9 +65,9 @@ function activate(context) {
                 </head>
                 <body>
                     <h2>Question: ${value}</h2>
-                    <h3><span>Answer:</span> ${
-                      JSON.parse(response.data).result
-                    }</h3>
+                    <h3><span>Answer:</span> ${JSON.parse(response.data)
+                      .result.replaceAll(" ", "&nbsp;")
+                      .replaceAll("\n", "<br />")}</h3>
                 </body>
                 </html>`;
               })
