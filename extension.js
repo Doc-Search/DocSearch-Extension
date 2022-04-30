@@ -46,6 +46,13 @@ function activate(context) {
               data: data,
             };
 
+            const { Configuration, OpenAIApi } = require("openai");
+
+            const configuration = new Configuration({
+              apiKey: process.env.OPENAI_API_KEY,
+            });
+            const openai = new OpenAIApi(configuration);
+
             axios(config)
               .then((response) => {
                 const panel = vscode.window.createWebviewPanel(
@@ -56,6 +63,23 @@ function activate(context) {
                     enableScripts: true,
                   }
                 );
+
+                async function fetchResponse(value) {
+                  const response = await openai.createCompletion(
+                    "text-davinci-002",
+                    {
+                      prompt: value,
+                      temperature: 0.7,
+                      max_tokens: 200,
+                      top_p: 1,
+                      frequency_penalty: 0.7,
+                      presence_penalty: 0,
+                    }
+                  );
+                  console.log(response);
+                  return response;
+                }
+
                 panel.webview.html = `<!DOCTYPE html>
                 <html lang="en">
                 <head>
@@ -63,11 +87,22 @@ function activate(context) {
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>Answer to query:</title>
                 </head>
-                <body>
-                    <h2>Question: ${value}</h2>
-                    <h3><span>Answer:</span> ${JSON.parse(response.data)
+                <body style="display:flex; flex-direction:column; width:100%;">
+                    <h2 style="height:15%; width:100%; border-bottom: 2px solid white; font-family:monospace;">Question: ${value}</h2>
+                    <h3 style="width:100%; y-overflow:scroll; x-overflow:none; font-family:monospace;"><span style="width: 100%;">Answer:</span> ${JSON.parse(
+                      response.data
+                    )
                       .result.replaceAll(" ", "&nbsp;")
-                      .replaceAll("\n", "<br />")}</h3>
+                      .replaceAll("\n", "<br />")}
+                    </h3>
+                    <div id="externals" style="width:75%; height:50%; display: flex; flex-direction: row; position: relative; left:50%; transform: translateX(-50%);">
+                      <a href="https://www.google.com/search?q=${value}" target="_blank" style="width: 50%; margin-right: 5px;">
+                        <button style="width:100%; height:100%; background-color: #4CAF50; border: 1px solid white; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; cursor:pointer;">Search on Google</button>
+                      </a>
+                      <a href="https://stackoverflow.com/search?q=${value}" target="_blank" style="width: 50%; margin-right: 5px;">
+                        <button style="width:100%; height:100%; background-color: #4CAF50; border: 1px solid white; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; cursor: pointer;">Search on StackOverflow</button>
+                      </a>
+                    </div>
                 </body>
                 </html>`;
               })
@@ -82,7 +117,6 @@ function activate(context) {
   context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
 function deactivate() {}
 
 module.exports = {
